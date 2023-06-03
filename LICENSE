@@ -1,24 +1,3 @@
-# TinyCSV
-
-A basic Swift CSV decoder library, conforming to [RFC 4180](https://www.rfc-editor.org/rfc/rfc4180.html) as closely as possible
-
-## Example
-
-```swift
-let parser = TinyCSV.Coder()
-
-let text = /* some csv text */
-let result = parser.decode(text: text)
-
-let rowCount = result.records.count
-let firstRowCellCount = result.records[0].count
-let firstRowFirstCell = result.records[0][0]
-let firstRowSecondCell = result.records[0][1]
-```
-
-## License
-
-```
 MIT License
 
 Copyright (c) 2023 Darren Ford
@@ -40,4 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-```
