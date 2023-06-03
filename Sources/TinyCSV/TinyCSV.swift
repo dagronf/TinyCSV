@@ -24,7 +24,9 @@ import Foundation
 public struct TinyCSV { }
 
 public extension TinyCSV {
-	struct Coder { }
+	struct Coder {
+		public init() { }
+	}
 	enum Delimiter: Character, CaseIterable {
 		case comma = ","
 		case semi = ";"
