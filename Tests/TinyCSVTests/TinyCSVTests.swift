@@ -1,7 +1,7 @@
 import XCTest
 @testable import TinyCSV
 
-final class TinyCSVTests: XCTestCase {
+final class TinyCSVDecoderTests: XCTestCase {
 	func testBasic() {
 		let text = "cat, dog, fish"
 		let parser = TinyCSV.Coder()
@@ -317,6 +317,15 @@ final class TinyCSVTests: XCTestCase {
 		XCTAssertEqual("17", result.records[17][0])
 		XCTAssertEqual("Morales, Hinton and Gibbs", result.records[17][2])
 		XCTAssertEqual("Museums / Institutions", result.records[17][7])
+	}
+
+	func testBrokenSample1() throws {
+		let text = "\"They used to work here, _____ they?\",hadn't,weren't,didn't,used not,0,0,1,0,4"
+		let parser = TinyCSV.Coder()
+		let result = parser.decode(text: text)
+		XCTAssertEqual(1, result.records.count)
+		XCTAssertEqual(10, result.records[0].count)
+		XCTAssertEqual(result.records[0][0], "They used to work here, _____ they?")
 	}
 }
 
