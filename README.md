@@ -1,8 +1,10 @@
 # TinyCSV
 
-A basic Swift CSV decoder library, conforming to [RFC 4180](https://www.rfc-editor.org/rfc/rfc4180.html) as closely as possible
+A basic Swift CSV decoder/encoder library, conforming to [RFC 4180](https://www.rfc-editor.org/rfc/rfc4180.html) as closely as possible
 
-## Example
+## Examples
+
+### Decoding
 
 ```swift
 let parser = TinyCSV.Coder()
@@ -14,6 +16,15 @@ let rowCount = result.records.count
 let firstRowCellCount = result.records[0].count
 let firstRowFirstCell = result.records[0][0]
 let firstRowSecondCell = result.records[0][1]
+```
+
+### Encoding
+
+```swift
+let parser = TinyCSV.Coder()
+
+let cells = [["This \"cat\" is bonkers", "dog"], ["fish", "chips"]]
+let encoded = parser.encode(csvdata: cells)
 ```
 
 ## License

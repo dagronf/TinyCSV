@@ -69,4 +69,24 @@ public extension TinyCSV.Coder {
 		let decoder = TinyCSV.Data(text: text, delimiter: delimiter)
 		return decoder.decode()
 	}
+
+	/// Encode CSV data to a string
+	/// - Parameters:
+	///   - csvdata: An array of array of strings
+	///   - delimiter: The delimiter to use
+	/// - Returns: the CSV-encoded data
+	func encode(csvdata: [[String]], delimiter: TinyCSV.Delimiter = .comma) -> String {
+		var out = ""
+		for row in csvdata {
+			for cell in row.enumerated() {
+				if cell.offset > 0 {
+					out += "\(delimiter.rawValue)"
+				}
+				let encoded = cell.element.replacingOccurrences(of: "\"", with: "\"\"")
+				out += "\"\(encoded)\""
+			}
+			out += "\r\n"
+		}
+		return out
+	}
 }
