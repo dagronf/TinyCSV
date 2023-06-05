@@ -19,6 +19,19 @@ final class TinyCSVDecoderTests: XCTestCase {
 		XCTAssertEqual(result3.records.count, 0)
 	}
 
+	func testSimple() {
+		do {
+			let text = """
+3,5,6,2,1,7,8
+4,5,7,3,2,8,9
+"""
+			let result = TinyCSV.Coder().decode(text: text)
+			XCTAssertEqual(result.records.count, 2)
+			XCTAssertEqual(result.records[0], ["3", "5", "6", "2", "1", "7", "8"])
+			XCTAssertEqual(result.records[1], ["4", "5", "7", "3", "2", "8", "9"])
+		}
+	}
+
 	func testBasic() {
 		let text = "cat, dog, fish"
 		let parser = TinyCSV.Coder()
@@ -176,6 +189,24 @@ B12,, IZOY, AB_K9Z_DD_18, RED,, 12,,,
 			XCTAssertEqual(result.records[0], ["Z10", "9", "HFJ", "", "", "", "", "", "", ""])
 			XCTAssertEqual(result.records[1], ["B12", "", "IZOY", "AB_K9Z_DD_18", "RED", "", "12", "", "", ""])
 		}
+	}
+
+	func testHeaders2() throws {
+		let text = """
+Name	Size	Bytes	Class	Attributes
+
+data	462x357	1319472	double
+data1	1x152	1216	double
+data2	1x152	1216	double
+t	462x357	1448071	table
+"""
+
+		let result = TinyCSV.Coder().decode(text: text, delimiter: .tab, headerLineCount: 2)
+		XCTAssertEqual(4, result.records.count)
+		XCTAssertEqual(result.records[0], ["data", "462x357", "1319472", "double"])
+		XCTAssertEqual(result.records[1], ["data1", "1x152", "1216", "double"])
+		XCTAssertEqual(result.records[2], ["data2", "1x152", "1216", "double"])
+		XCTAssertEqual(result.records[3], ["t", "462x357", "1448071", "table"])
 	}
 
 	func testSlightlyMoreComplex() throws {

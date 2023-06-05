@@ -50,13 +50,16 @@ internal extension TinyCSV.Data {
 		return self
 	}
 
-	private func parseComment() -> State {
+	private func skipLine() -> State {
+		// We should be right at the start of the comment line.
+		// Make sure we check -- the line might be completely blank (ie. the current character is a newline)
+
 		// Read to end of line
 		while true {
-			if moveToNextCharacter() == false { return .endOfFile }
 			if character.isNewline {
 				break
 			}
+			if moveToNextCharacter() == false { return .endOfFile }
 		}
 		if moveToNextCharacter() == false { return .endOfFile }
 		return .endOfLine
@@ -71,7 +74,7 @@ internal extension TinyCSV.Data {
 		// just skip the line entirely
 		if headerLineCount > 0 || character == commentCharacter {
 			if headerLineCount > 0 { headerLineCount -= 1 }
-			return parseComment()
+			return skipLine()
 		}
 
 		while true {
