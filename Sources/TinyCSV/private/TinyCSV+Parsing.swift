@@ -1,5 +1,5 @@
 //
-//  TinyCSV+Data+parser.swift
+//  TinyCSV+Parsing.swift
 //
 //  Copyright © 2023 Darren Ford. All rights reserved.
 //
@@ -23,14 +23,14 @@ import Foundation
 
 // Routines for decoding csv
 
-internal extension TinyCSV.Data {
+internal extension TinyCSV.EventDrivenDecoder {
 
-	func decode() -> TinyCSV.Data {
+	func startParsing() {
 		// file = [header CRLF] record *(CRLF record) [CRLF]
 
 		index = text.startIndex
-		records = []
 		field = ""
+		currentRow = 0
 
 		while !isEndOfFile {
 			record = []
@@ -43,11 +43,14 @@ internal extension TinyCSV.Data {
 				if state == .endOfFileWasSeparator {
 					record.append("")
 				}
-				records.append(record)
+
+				if (self.emitRecord?(currentRow, record) ?? true) == false {
+					// Callback has told us to stop
+					return
+				}
+				currentRow += 1
 			}
 		}
-
-		return self
 	}
 
 	private func skipLine() -> State {
@@ -80,6 +83,10 @@ internal extension TinyCSV.Data {
 		while true {
 			field = ""
 			let state = parseField()
+			if (self.emitField?(currentRow, record.count, field) ?? true) == false {
+				// callback has told us to stop
+				return .endOfFile
+			}
 			record.append(field)
 			if state != .endOfField {
 				return state
@@ -187,7 +194,7 @@ internal extension TinyCSV.Data {
 	}
 }
 
-private extension TinyCSV.Data {
+private extension TinyCSV.EventDrivenDecoder {
 	private var isEndOfFile: Bool { index == text.endIndex }
 	private var isEndOfLine: Bool { text[index].isNewline }
 	private var isDQuote: Bool { text[index] == "\"" }

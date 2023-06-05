@@ -21,47 +21,35 @@
 
 import Foundation
 
-internal extension TinyCSV {
-	/// CSV Data that has been read from a file
-	class Data: TinyCSVData {
-		/// The records read from the file
+extension TinyCSV {
+	/// A decoder that parses the entire text before returning
+	class Decoder: EventDrivenDecoder, TinyCSVData {
 		var records: [[String]] = []
-		/// The text
-		let text: String
-		/// The delimiter
-		let delimiter: Delimiter
-
-		/// The character to identify as an escape character in a unquoted string
-		/// For example, content like
-		///
-		/// ```titles01/tt0057012,tt0057012,Dr. Seltsam\, oder wie ich lernte\, die Bombe zu lieben (1964),dr seltsam oder wie ich lernte die bombe zu lieben,http://www.imdb.com/title/tt0057012/```
-		var fieldEscapeCharacter: Character?
-
-		/// The character to use to define a comment line (must be the first character in the line)
-		var commentCharacter: Character?
-
-		/// The number of lines to treat as header lines
-		var headerLineCount: UInt = 0
-
-		// Private
-
-		var index: String.Index
-		var record: [String] = []
-		var field = ""
-
-		init(
+		override init(
 			text: String,
 			delimiter: TinyCSV.Delimiter,
 			fieldEscapeCharacter: Character? = nil,
 			commentCharacter: Character? = nil,
 			headerLineCount: UInt? = nil
 		) {
-			self.text = text
-			self.index = text.startIndex
-			self.delimiter = delimiter
-			self.fieldEscapeCharacter = fieldEscapeCharacter
-			self.commentCharacter = commentCharacter
-			self.headerLineCount = headerLineCount ?? 0
+			super.init(
+				text: text,
+				delimiter: delimiter,
+				fieldEscapeCharacter: fieldEscapeCharacter,
+				commentCharacter: commentCharacter,
+				headerLineCount: headerLineCount
+			)
+			self.emitRecord = { [weak self] row, columns in
+				guard let `self` = self else { return false }
+				self.records.append(columns)
+				return true
+			}
+		}
+
+		func decode() -> TinyCSVData {
+			records = []
+			super.startParsing()
+			return self
 		}
 	}
 }

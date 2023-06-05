@@ -5,21 +5,19 @@ A basic Swift CSV decoder/encoder library, conforming to [RFC 4180](https://www.
 ![Platform support](https://img.shields.io/badge/platform-ios%20%7C%20osx%20%7C%20tvos%20%7C%20watchos%20%7C%20linux-lightgrey.svg?style=flat-square)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/dagronf/TinyCSV/blob/master/LICENSE)
 
-Designed to be a minimalist trivial reader, returning a basic array of rows of cells (strings).
+Designed to be a minimalist csv decoder and encoder, returning a basic array of rows of cells (strings) during decoding.
 
 TinyCSV doesn't enforce columns, header rows or 'expected' values. If the first row in your file has 10 cells and the second has only 8 cells, then that's what you'll get in the returned data. There are no column formatting rules, it is up to you to handle and massage the data after it is returned.
 
-All processing is (currently) handled in memory, so large csv files may cause memory stress on smaller devices.
-
+All processing is (currently) handled in memory, so large csv files may cause memory stress on smaller devices. If you want to reduce your memory footprint, you might try looking into the [event driven decoding method](#event-driven-decoding-id).  
 
 ## Parsing options
 
 ### Specifying a delimiter
 
-By default, the library attempts to determine the delimiter by scanning the first row in the file. If it cannot determine
-a delimiter, it will default to using a comma.
-
 You can specify a delimiter to use when decoding the file. 
+
+By default, the library attempts to determine the delimiter by scanning the first row in the file. If it cannot determine a delimiter, it will default to using a comma.
 
 ```swift
 // Use `tab` as a delimiter
@@ -31,8 +29,7 @@ let result = parser.decode(text: text, delimiter: "-")
 
 ### Skipping header lines
 
-If your CSV file has a fixed number of lines at the start that are not part of the csv data, you can skip them by
-setting the header line count.
+If your CSV file has a fixed number of lines at the start that are not part of the csv data, you can skip them by setting the header line count.
 
 ```
 #Release 0.4
@@ -47,8 +44,7 @@ let result = parser.decode(text: demoText, headerLineCount: 2)
 
 ### Line comment
 
-You can specify the character to use to indicate that the line is to be treated as comment.
-If a line starts with the comment character, the line is ignored (unless it is contained within a multi-line quoted field).
+You can specify the character to use to indicate that the line is to be treated as comment. If a line starts with the comment character, the line is ignored (unless it is contained within a multi-line quoted field).
 
 For example
 
@@ -66,13 +62,11 @@ let result = parser.decode(text: text, commentCharacter: "#")
 
 ### Escape character
 
-Some CSVs use an escaping character to indicate that the next character is to be taken literally, especially when
-dealing with files that don't quote their fields, for example :-
+Some CSVs use an escaping character to indicate that the next character is to be taken literally, especially when dealing with files that don't quote their fields, for example :-
 
 `…,Dr. Seltsam\, oder wie ich lernte\, die Bombe zu lieben (1964),…`
 
-The parser allows you to optionally specify an escape charcter (in the above example, the escape char is `\`) to 
-indicate that the embedded commas are part of the field, and is not to be treated as a delimiter.
+The parser allows you to optionally specify an escape charcter (in the above example, the escape char is `\`) to indicate that the embedded commas are part of the field, and is not to be treated as a delimiter.
 
 ```swift
 let result = parser.decode(text: text, fieldEscapeCharacter: "\\")
@@ -96,8 +90,7 @@ let firstRowSecondCell = result.records[0][1]
 
 ### Encoding
 
-The encoder automatically sanitizes each cell's text, meaning you don't have to concern yourself with the csv
-encoding rules.
+The encoder automatically sanitizes each cell's text, meaning you don't have to concern yourself with the csv encoding rules.
 
 ```swift
 let parser = TinyCSV.Coder()
@@ -113,6 +106,36 @@ produces
 "fish","chips
 salt"
 
+```
+
+## <a name="event-driven-decoding-id"></a> Event driven decoding
+
+`TinyCSV` internally uses an event-driven model when parsing csv content. 
+
+The `startDecoding` method on the coder allows you to access the event driven decoding functionality if you need more fine-grained control over the decoding process, and don't `TinyCSV` to store an entire copy of the decoded results in memory.
+
+You can choose to receive callbacks when :- 
+
+* The parser emits a field (including the row number, the column number and text)
+* The parser emits a record (including the row number and the array of column texts)
+
+These callback functions return a boolean value. Return `true` to continue parsing, `false` to stop.
+
+### Example
+
+```swift
+let coder = TinyCSV.Coder()
+coder.startDecoding(
+   text: <some text>,
+   emitField: { row, column, text in
+      Swift.print("\(row), \(column): \(text)")
+      return true
+   },
+   emitRecord: { row, columns in
+      Swift.print("\(row): \(columns)")
+      return true
+   }
+)
 ```
 
 ## License

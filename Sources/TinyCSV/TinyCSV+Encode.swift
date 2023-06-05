@@ -1,5 +1,5 @@
 //
-//  TinyCSV.swift
+//  TinyCSV+Encode.swift
 //
 //  Copyright © 2023 Darren Ford. All rights reserved.
 //
@@ -19,14 +19,28 @@
 //  OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
+// CSV encoder routines
+
 import Foundation
 
-/// TinyCSV namespace
-public struct TinyCSV { }
-
-public extension TinyCSV {
-	/// Base coder object
-	struct Coder {
-		public init() { }
+public extension TinyCSV.Coder {
+	/// Encode CSV data to a string
+	/// - Parameters:
+	///   - csvdata: An array of array of strings
+	///   - delimiter: The delimiter to use
+	/// - Returns: a CSV-encoded string
+	func encode(csvdata: [[String]], delimiter: TinyCSV.Delimiter = .comma) -> String {
+		var out = ""
+		for row in csvdata {
+			for cell in row.enumerated() {
+				if cell.offset > 0 {
+					out += "\(delimiter)"
+				}
+				let encoded = cell.element.replacingOccurrences(of: "\"", with: "\"\"")
+				out += "\"\(encoded)\""
+			}
+			out += "\r\n"
+		}
+		return out
 	}
 }
