@@ -77,9 +77,21 @@ public extension TinyCSV.Coder {
 	///   - text: The text containing the CSV data
 	///   - delimiter: The delimiter to use, or nil for auto-detect
 	/// - Returns: CSV data
-	func decode(text: String, delimiter: TinyCSV.Delimiter? = nil, fieldEscapeCharacter: Character? = nil) -> TinyCSVData {
+	func decode(
+		text: String,
+		delimiter: TinyCSV.Delimiter? = nil,
+		fieldEscapeCharacter: Character? = nil,
+		commentCharacter: Character? = nil,
+		headerLineCount: UInt? = nil
+	) -> TinyCSVData {
 		let delimiter = delimiter ?? TinyCSV.detectSeparator(text: text) ?? .comma
-		let decoder = TinyCSV.Data(text: text, delimiter: delimiter, fieldEscapeCharacter: fieldEscapeCharacter)
+		let decoder = TinyCSV.Data(
+			text: text,
+			delimiter: delimiter,
+			fieldEscapeCharacter: fieldEscapeCharacter,
+			commentCharacter: commentCharacter,
+			headerLineCount: headerLineCount
+		)
 		return decoder.decode()
 	}
 

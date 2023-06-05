@@ -108,6 +108,76 @@ final class TinyCSVDecoderTests: XCTestCase {
 		}
 	}
 
+	func testComment() throws {
+		let text = """
+  # Here is my amazing, and \"groovy\", commented file!
+  cat, dog, pig
+  fish, truck, snozzle
+  """
+
+		let parser = TinyCSV.Coder()
+		do {
+			// Ignore the comment character
+			let result = parser.decode(text: text)
+			XCTAssertEqual(3, result.records.count)
+			XCTAssertEqual(result.records[0], ["# Here is my amazing", "and \"groovy\"", "commented file!"])
+			XCTAssertEqual(result.records[1], ["cat", "dog", "pig"])
+			XCTAssertEqual(result.records[2], ["fish", "truck", "snozzle"])
+		}
+
+		do {
+			// Supply a comment character
+			let result = parser.decode(text: text, commentCharacter: "#")
+			XCTAssertEqual(2, result.records.count)
+			XCTAssertEqual(result.records[0], ["cat", "dog", "pig"])
+			XCTAssertEqual(result.records[1], ["fish", "truck", "snozzle"])
+		}
+
+		do {
+			let text = "% First line\n%Second line\nThird, Line"
+			let result = parser.decode(text: text, commentCharacter: "%")
+			XCTAssertEqual(1, result.records.count)
+			XCTAssertEqual(result.records[0], ["Third", "Line"])
+		}
+	}
+
+	func testNumHeaders() throws {
+		let demoText = """
+#Release 0.4
+#Copyright (c) 2015 SomeCompany.
+#
+Z10,9,HFJ,,,,,,,
+# Another
+B12,, IZOY, AB_K9Z_DD_18, RED,, 12,,,
+"""
+		let parser = TinyCSV.Coder()
+
+		do {
+			let result = parser.decode(text: demoText, delimiter: .comma, commentCharacter: "#")
+			XCTAssertEqual(2, result.records.count)
+			XCTAssertEqual(result.records[0], ["Z10", "9", "HFJ", "", "", "", "", "", "", ""])
+			XCTAssertEqual(result.records[1], ["B12", "", "IZOY", "AB_K9Z_DD_18", "RED", "", "12", "", "", ""])
+		}
+
+		do {
+			// Skip the first two lines
+			let result = parser.decode(text: demoText, delimiter: .comma, headerLineCount: 2)
+			XCTAssertEqual(4, result.records.count)
+			XCTAssertEqual(result.records[0], ["#"])
+			XCTAssertEqual(result.records[1], ["Z10", "9", "HFJ", "", "", "", "", "", "", ""])
+			XCTAssertEqual(result.records[2], ["# Another"])
+			XCTAssertEqual(result.records[3], ["B12", "", "IZOY", "AB_K9Z_DD_18", "RED", "", "12", "", "", ""])
+		}
+
+		do {
+			// First line header line, comments
+			let result = parser.decode(text: demoText, delimiter: .comma, commentCharacter: "#", headerLineCount: 1)
+			XCTAssertEqual(2, result.records.count)
+			XCTAssertEqual(result.records[0], ["Z10", "9", "HFJ", "", "", "", "", "", "", ""])
+			XCTAssertEqual(result.records[1], ["B12", "", "IZOY", "AB_K9Z_DD_18", "RED", "", "12", "", "", ""])
+		}
+	}
+
 	func testSlightlyMoreComplex() throws {
 		let text =
 		"# Here is my amazing, and \"groovy\", commented file!\r" +
@@ -115,19 +185,19 @@ final class TinyCSVDecoderTests: XCTestCase {
 		"#Here is the next comment...\n" +
 		"\"cat\n#fish\", truck, snozzle"
 		let parser = TinyCSV.Coder()
-		let result = parser.decode(text: text)
+		let result = parser.decode(text: text, commentCharacter: "#")
 
 		XCTAssertEqual(2, result.records.count)
 		XCTAssertEqual(3, result.records[0].count)
 		XCTAssertEqual(3, result.records[1].count)
 
-		XCTAssertEqual("cat", result.records[0][0]);
-		XCTAssertEqual("#dog", result.records[0][1]);
-		XCTAssertEqual("pig", result.records[0][2]);
+		XCTAssertEqual("cat", result.records[0][0])
+		XCTAssertEqual("#dog", result.records[0][1])
+		XCTAssertEqual("pig", result.records[0][2])
 
-		XCTAssertEqual("cat\n#fish", result.records[1][0]);
-		XCTAssertEqual("truck", result.records[1][1]);
-		XCTAssertEqual("snozzle", result.records[1][2]);
+		XCTAssertEqual("cat\n#fish", result.records[1][0])
+		XCTAssertEqual("truck", result.records[1][1])
+		XCTAssertEqual("snozzle", result.records[1][2])
 	}
 
 	func testMoreQuotedFields() throws {

@@ -65,8 +65,12 @@ internal extension TinyCSV.Data {
 	private func parseRecord() -> State {
 		// record = field *(COMMA field)
 
-		// If the start of the line is a #, just skip the line entirely
-		if character == "#" {
+		// If the start of the line is
+		// * within the header line count, or
+		// * the comment character
+		// just skip the line entirely
+		if headerLineCount > 0 || character == commentCharacter {
+			if headerLineCount > 0 { headerLineCount -= 1 }
 			return parseComment()
 		}
 

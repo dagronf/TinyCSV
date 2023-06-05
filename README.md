@@ -29,6 +29,41 @@ let result = parser.decode(text: text, delimiter: .tab)
 let result = parser.decode(text: text, delimiter: "-")
 ```
 
+### Skipping header lines
+
+If your CSV file has a fixed number of lines at the start that are not part of the csv data, you can skip them by
+setting the header line count.
+
+```
+#Release 0.4
+#Copyright (c) 2015 SomeCompany.
+Z10,9,HFJ,，，，，，
+B12,, IZOY, AB_K9Z_DD_18, RED,, 12,,,
+```
+
+```swift
+let result = parser.decode(text: demoText, headerLineCount: 2)
+```
+
+### Line comment
+
+You can specify the character to use to indicate that the line is to be treated as comment.
+If a line starts with the comment character, the line is ignored (unless it is contained within a multi-line quoted field).
+
+For example
+
+```
+#Release 0.4
+#Copyright (c) 2015 SomeCompany.
+Z10,9,HFJ,，，，，，
+B12,, IZOY, AB_K9Z_DD_18, RED,, 12,,,
+```
+
+```swift
+// Use `#` to ignore the comment lines
+let result = parser.decode(text: text, commentCharacter: "#")
+```
+
 ### Escape character
 
 Some CSVs use an escaping character to indicate that the next character is to be taken literally, especially when
