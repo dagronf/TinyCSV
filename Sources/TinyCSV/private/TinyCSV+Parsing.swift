@@ -25,11 +25,11 @@ import Foundation
 
 internal extension TinyCSV.EventDrivenDecoder {
 
-	@inlinable func performEmitCurrentField(text: String) -> Bool {
+	@inlinable @inline(__always) func performEmitCurrentField(text: String) -> Bool {
 		self.emitField?(currentRow, record.count, text) ?? true
 	}
 
-	@inlinable func performEmitCurrentRecord() -> Bool {
+	@inlinable @inline(__always) func performEmitCurrentRecord() -> Bool {
 		self.emitRecord?(currentRow, record) ?? true
 	}
 
@@ -149,7 +149,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 							if moveToNextCharacter() == false { return .endOfFile }
 							return .endOfLine
 						}
-						if isSeparator {
+						if isDelimiter {
 							if moveToNextCharacter() == false {
 								// Literally a separator at the end of the file
 								return .endOfFileWasSeparator
@@ -160,7 +160,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 					}
 				}
 			}
-			else if character == fieldEscapeCharacter {
+			else if isFieldEscape {
 				// The character following the escape character should be treated as a regular character
 				if moveToNextCharacter() == false { return .endOfFile }
 				field.append(character)
@@ -177,7 +177,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 			// The character following the escape character should be treated as a string character
 			if moveToNextCharacter() == false { return .endOfFile }
 		}
-		else if isSeparator {
+		else if isDelimiter {
 			// If the separator is the last line in the file, make sure
 			// we indicate that back to the parser
 			if moveToNextCharacter() == false { return .endOfFileWasSeparator }
@@ -196,7 +196,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 				if moveToNextCharacter() == false { return .endOfFile }
 				field.append(character)
 			}
-			else if isSeparator {
+			else if isDelimiter {
 				// If the separator is the last line in the file, make sure
 				// we indicate that back to the parser
 				if moveToNextCharacter() == false { return .endOfFileWasSeparator }
@@ -215,7 +215,8 @@ private extension TinyCSV.EventDrivenDecoder {
 	private var isEndOfFile: Bool { index == text.endIndex }
 	private var isEndOfLine: Bool { text[index].isNewline }
 	private var isDQuote: Bool { text[index] == "\"" }
-	private var isSeparator: Bool { text[index] == delimiter }
+	private var isDelimiter: Bool { text[index] == delimiter }
+	private var isFieldEscape: Bool { text[index] == fieldEscapeCharacter}
 	private var character: Character { text[index] }
 
 	private enum State {
