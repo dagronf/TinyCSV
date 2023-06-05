@@ -1,7 +1,24 @@
 import XCTest
 @testable import TinyCSV
 
+func loadCSV(name: String, extn: String) throws -> String {
+	let fileURL = Bundle.module.url(forResource: name, withExtension: extn)!
+	return try String(contentsOf: fileURL)
+}
+
 final class TinyCSVDecoderTests: XCTestCase {
+
+	func testEmpty() {
+		let result1 = TinyCSV.Coder().decode(text: "")
+		XCTAssertEqual(result1.records.count, 0)
+
+		let result2 = TinyCSV.Coder().decode(text: " ")
+		XCTAssertEqual(result2.records.count, 0)
+
+		let result3 = TinyCSV.Coder().decode(text: " \n ")
+		XCTAssertEqual(result3.records.count, 0)
+	}
+
 	func testBasic() {
 		let text = "cat, dog, fish"
 		let parser = TinyCSV.Coder()
@@ -293,18 +310,34 @@ final class TinyCSVDecoderTests: XCTestCase {
 
 	func testEmptyFields() throws {
 		let text = """
- id,name,age
- 1,John,23
- 2,James,32
- 3,,
- 6
+			id,name,age
+			1,John,23
+			2,-James,32
+			3,,
+			6
 
- ,Tom
- """
+			,Tom
+			"""
 		let parser = TinyCSV.Coder()
-		let result = parser.decode(text: text)
-		XCTAssertEqual(result.delimiter, .comma)
-		XCTAssertEqual(6, result.records.count)
+		do {
+			let result = parser.decode(text: text)
+			XCTAssertEqual(result.delimiter, .comma)
+			XCTAssertEqual(6, result.records.count)
+			XCTAssertEqual(result.records[0], ["id", "name" ,"age"])
+			XCTAssertEqual(result.records[1], ["1", "John" ,"23"])
+			XCTAssertEqual(result.records[2], ["2", "-James" ,"32"])
+			XCTAssertEqual(result.records[5], ["", "Tom"])
+		}
+
+		do {
+			let result = parser.decode(text: text, delimiter: "-")
+			XCTAssertEqual(result.delimiter, "-")
+			XCTAssertEqual(6, result.records.count)
+			XCTAssertEqual(result.records[0], ["id,name,age"])
+			XCTAssertEqual(result.records[1], ["1,John,23"])
+			XCTAssertEqual(result.records[2], ["2,", "James,32"])
+			XCTAssertEqual(result.records[5], [",Tom"])
+		}
 	}
 
 	func testSampleOrganizations1000() throws {
@@ -319,6 +352,42 @@ final class TinyCSVDecoderTests: XCTestCase {
 		XCTAssertEqual("Museums / Institutions", result.records[17][7])
 	}
 
+	func testIMDB1000() throws {
+		let text = try loadCSV(name: "imdb_top_1000", extn: "csv")
+		let parser = TinyCSV.Coder()
+		let result = parser.decode(text: text)
+		XCTAssertEqual(1001, result.records.count)
+		for row in result.records {
+			XCTAssertEqual(16, row.count)
+		}
+	}
+
+	func testIMDBwithOddness() throws {
+		// This file uses an escaping char `\` to allow embedding of `,` in a field
+		// Record 65 contains a field `Dr. Seltsam\, oder wie ich lernte\, die Bombe zu lieben (1964)` which by defaults
+		// parsing as "Dr. Seltsam\", "oder wie ich lernte\", "die Bombe zu lieben (1964)"
+		// Providing an escaping character for unquoted fields allows parsing these custom outputs
+		let fileURL = Bundle.module.url(forResource: "imdb_line65", withExtension: "csv")!
+		let text = try String(contentsOf: fileURL)
+		let parser = TinyCSV.Coder()
+
+		do {
+			// By default, record 65 has two more fields due to the escaping character being ignored
+			let brokenResult = parser.decode(text: text)
+			XCTAssertEqual(101, brokenResult.records.count)
+			XCTAssertEqual(46, brokenResult.records[65].count)
+		}
+
+		do {
+			// Adding the escaping character - all the records should now have the same length
+			let result = parser.decode(text: text, fieldEscapeCharacter: "\\")
+			XCTAssertEqual(101, result.records.count)
+			result.records.forEach { row in
+				XCTAssertEqual(44, row.count)
+			}
+		}
+	}
+
 	func testBrokenSample1() throws {
 		let text = "\"They used to work here, _____ they?\",hadn't,weren't,didn't,used not,0,0,1,0,4"
 		let parser = TinyCSV.Coder()
@@ -326,6 +395,18 @@ final class TinyCSVDecoderTests: XCTestCase {
 		XCTAssertEqual(1, result.records.count)
 		XCTAssertEqual(10, result.records[0].count)
 		XCTAssertEqual(result.records[0][0], "They used to work here, _____ they?")
+	}
+
+	func testBadness() throws {
+		// See https://link.springer.com/epdf/10.1007/s10618-019-00646-y?author_access_token=siAh_b--0tDYVVGfhJfPNfe4RwlQNchNByi7wbcMAY6WctoMJ0_uYw5qYic6rj8bxLlM6h9UGccgS8iiv3t-6s6YSmNbXx0OAmMN7DSsRXTWS0D3rxIGj0AkKMufb9hTfyZk8U78niFRGsr77-WHUg==
+		let fileURL = Bundle.module.url(forResource: "single-row-oddness", withExtension: "csv")!
+		let text = try String(contentsOf: fileURL)
+		let parser = TinyCSV.Coder()
+		let result = parser.decode(text: text, fieldEscapeCharacter: "\\")
+		XCTAssertEqual(1, result.records.count)
+		XCTAssertEqual(5, result.records[0].count)
+		XCTAssertEqual(result.records[0][3], "\nwith a number of issues\nthat shows \"double quoting\"\n\"escaping\" and multi-line cells\n")
+		XCTAssertEqual(result.records[0][4], ", and has only one row!")
 	}
 }
 

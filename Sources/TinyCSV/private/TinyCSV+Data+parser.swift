@@ -129,6 +129,11 @@ internal extension TinyCSV.Data {
 					}
 				}
 			}
+			else if character == fieldEscapeCharacter {
+				// The character following the escape character should be treated as a regular character
+				if moveToNextCharacter() == false { return .endOfFile }
+				field.append(character)
+			}
 			else {
 				field.append(character)
 			}
@@ -137,7 +142,11 @@ internal extension TinyCSV.Data {
 
 	private func parseNonEscapedField() -> State {
 		// non-escaped = *TEXTDATA
-		if isSeparator {
+		if character == fieldEscapeCharacter {
+			// The character following the escape character should be treated as a string character
+			if moveToNextCharacter() == false { return .endOfFile }
+		}
+		else if isSeparator {
 			// If the separator is the last line in the file, make sure
 			// we indicate that back to the parser
 			if moveToNextCharacter() == false { return .endOfFileWasSeparator }
@@ -150,13 +159,19 @@ internal extension TinyCSV.Data {
 		while true {
 			// Just continue until we hit a separator
 			if moveToNextCharacter() == false { return .endOfFile }
-			if isSeparator {
+
+			if character == fieldEscapeCharacter {
+				// The character following the escape character should be treated as a string character
+				if moveToNextCharacter() == false { return .endOfFile }
+				field.append(character)
+			}
+			else if isSeparator {
 				// If the separator is the last line in the file, make sure
 				// we indicate that back to the parser
 				if moveToNextCharacter() == false { return .endOfFileWasSeparator }
 				return .endOfField
 			}
-			if isEndOfLine {
+			else if isEndOfLine {
 				if moveToNextCharacter() == false { return .endOfFile }
 				return .endOfLine
 			}
@@ -169,7 +184,7 @@ private extension TinyCSV.Data {
 	private var isEndOfFile: Bool { index == text.endIndex }
 	private var isEndOfLine: Bool { text[index].isNewline }
 	private var isDQuote: Bool { text[index] == "\"" }
-	private var isSeparator: Bool { text[index] == delimiter.rawValue }
+	private var isSeparator: Bool { text[index] == delimiter }
 	private var character: Character { text[index] }
 
 	private enum State {

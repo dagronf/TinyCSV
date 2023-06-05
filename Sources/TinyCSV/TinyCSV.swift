@@ -27,11 +27,9 @@ public extension TinyCSV {
 	struct Coder {
 		public init() { }
 	}
-	enum Delimiter: Character, CaseIterable {
-		case comma = ","
-		case semi = ";"
-		case tab = "\t"
-	}
+
+	/// The delimiter type
+	typealias Delimiter = Character
 
 	/// Detect the separator for the text using a basic algorithm
 	///
@@ -47,8 +45,8 @@ public extension TinyCSV {
 
 		var which = 0
 		var selected: TinyCSV.Delimiter?
-		for delimiter in TinyCSV.Delimiter.allCases {
-			let count = text.filter { $0 == delimiter.rawValue }.count
+		for delimiter in TinyCSV.Delimiter.allDelimiters {
+			let count = text.filter { $0 == delimiter }.count
 			if count > which {
 				which = count
 				selected = delimiter
@@ -58,15 +56,30 @@ public extension TinyCSV {
 	}
 }
 
+public extension TinyCSV.Delimiter {
+	/// Comma delimiter
+	static let comma: TinyCSV.Delimiter = ","
+	/// Semicolon delimiter
+	static let semicolon: TinyCSV.Delimiter = ";"
+	/// Tab delimiter
+	static let tab: TinyCSV.Delimiter = "\t"
+	/// All the default delimiters
+	static var allDelimiters: [TinyCSV.Delimiter] = [
+		TinyCSV.Delimiter.comma,
+		TinyCSV.Delimiter.semicolon,
+		TinyCSV.Delimiter.tab
+	]
+}
+
 public extension TinyCSV.Coder {
 	/// Decode CSV data
 	/// - Parameters:
 	///   - text: The text containing the CSV data
 	///   - delimiter: The delimiter to use, or nil for auto-detect
 	/// - Returns: CSV data
-	func decode(text: String, delimiter: TinyCSV.Delimiter? = nil) -> TinyCSVData {
+	func decode(text: String, delimiter: TinyCSV.Delimiter? = nil, fieldEscapeCharacter: Character? = nil) -> TinyCSVData {
 		let delimiter = delimiter ?? TinyCSV.detectSeparator(text: text) ?? .comma
-		let decoder = TinyCSV.Data(text: text, delimiter: delimiter)
+		let decoder = TinyCSV.Data(text: text, delimiter: delimiter, fieldEscapeCharacter: fieldEscapeCharacter)
 		return decoder.decode()
 	}
 
@@ -80,7 +93,7 @@ public extension TinyCSV.Coder {
 		for row in csvdata {
 			for cell in row.enumerated() {
 				if cell.offset > 0 {
-					out += "\(delimiter.rawValue)"
+					out += "\(delimiter)"
 				}
 				let encoded = cell.element.replacingOccurrences(of: "\"", with: "\"\"")
 				out += "\"\(encoded)\""

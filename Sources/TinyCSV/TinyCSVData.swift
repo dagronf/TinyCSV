@@ -27,6 +27,8 @@ public protocol TinyCSVData {
 	var text: String { get }
 	/// The delimiter
 	var delimiter: TinyCSV.Delimiter { get }
+	/// The escape character to use within fields
+	var fieldEscapeCharacter: Character? { get }
 	/// The parsed records
 	var records: [[String]] { get }
 }

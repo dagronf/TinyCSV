@@ -11,6 +11,38 @@ TinyCSV doesn't enforce columns, header rows or 'expected' values. If the first 
 
 All processing is (currently) handled in memory, so large csv files may cause memory stress on smaller devices.
 
+
+## Parsing options
+
+### Specifying a delimiter
+
+By default, the library attempts to determine the delimiter by scanning the first row in the file. If it cannot determine
+a delimiter, it will default to using a comma.
+
+You can specify a delimiter to use when decoding the file. 
+
+```swift
+// Use `tab` as a delimiter
+let result = parser.decode(text: text, delimiter: .tab)
+
+// Use `-` as the delimiter
+let result = parser.decode(text: text, delimiter: "-")
+```
+
+### Escape character
+
+Some CSVs use an escaping character to indicate that the next character is to be taken literally, especially when
+dealing with files that don't quote their fields, for example :-
+
+`…,Dr. Seltsam\, oder wie ich lernte\, die Bombe zu lieben (1964),…`
+
+The parser allows you to optionally specify an escape charcter (in the above example, the escape char is `\`) to 
+indicate that the embedded commas are part of the field, and is not to be treated as a delimiter.
+
+```swift
+let result = parser.decode(text: text, fieldEscapeCharacter: "\\")
+```
+
 ## Examples
 
 ### Decoding

@@ -31,16 +31,23 @@ internal extension TinyCSV {
 		/// The delimiter
 		let delimiter: Delimiter
 
+		/// The character to identify as an escape character in a unquoted string
+		/// For example, content like
+		///
+		/// ```titles01/tt0057012,tt0057012,Dr. Seltsam\, oder wie ich lernte\, die Bombe zu lieben (1964),dr seltsam oder wie ich lernte die bombe zu lieben,http://www.imdb.com/title/tt0057012/```
+		var fieldEscapeCharacter: Character?
+
 		// Private
 
 		var index: String.Index
 		var record: [String] = []
 		var field = ""
 
-		init(text: String, delimiter: TinyCSV.Delimiter) {
+		init(text: String, delimiter: TinyCSV.Delimiter, fieldEscapeCharacter: Character? = nil) {
 			self.text = text
 			self.index = text.startIndex
 			self.delimiter = delimiter
+			self.fieldEscapeCharacter = fieldEscapeCharacter
 		}
 	}
 }
