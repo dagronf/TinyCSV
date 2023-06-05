@@ -25,6 +25,14 @@ import Foundation
 
 internal extension TinyCSV.EventDrivenDecoder {
 
+	@inlinable func performEmitCurrentField(text: String) -> Bool {
+		self.emitField?(currentRow, record.count, text) ?? true
+	}
+
+	@inlinable func performEmitCurrentRecord() -> Bool {
+		self.emitRecord?(currentRow, record) ?? true
+	}
+
 	func startParsing() {
 		// file = [header CRLF] record *(CRLF record) [CRLF]
 
@@ -41,16 +49,25 @@ internal extension TinyCSV.EventDrivenDecoder {
 					continue
 				}
 				if state == .endOfFileWasSeparator {
+					if performEmitCurrentField(text: "") == false {
+						// Callback has told us to stop
+						return
+					}
 					record.append("")
 				}
 
-				if (self.emitRecord?(currentRow, record) ?? true) == false {
+				if performEmitCurrentRecord() == false {
 					// Callback has told us to stop
 					return
 				}
 				currentRow += 1
 			}
 		}
+
+		// Clean up
+
+		field = ""
+		record = []
 	}
 
 	private func skipLine() -> State {
@@ -83,7 +100,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 		while true {
 			field = ""
 			let state = parseField()
-			if (self.emitField?(currentRow, record.count, field) ?? true) == false {
+			if performEmitCurrentField(text: field) == false {
 				// callback has told us to stop
 				return .endOfFile
 			}
