@@ -112,7 +112,7 @@ salt"
 
 `TinyCSV` internally uses an event-driven model when parsing csv content. 
 
-The `startDecoding` method on the coder allows you to access the event driven decoding functionality if you need more fine-grained control over the decoding process, and don't `TinyCSV` to store an entire copy of the decoded results in memory.
+The `startDecoding` method on the coder allows you to access the event driven decoding functionality if you need more fine-grained control over the decoding process, and don't want `TinyCSV` to store an entire copy of the decoded results in memory.
 
 You can choose to receive callbacks when :- 
 
