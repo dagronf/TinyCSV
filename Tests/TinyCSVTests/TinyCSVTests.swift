@@ -509,6 +509,14 @@ t	462x357	1448071	table
 		XCTAssertEqual(result.records[0][3], "\nwith a number of issues\nthat shows \"double quoting\"\n\"escaping\" and multi-line cells\n")
 		XCTAssertEqual(result.records[0][4], ", and has only one row!")
 	}
+
+	func testNewlineInUnquotedFields() throws {
+		let text = try loadCSV(name: "testNewlineInUnquotedField", extn: "tsv")
+		let result = TinyCSV.Coder().decode(text: text, delimiter: .tab, fieldEscapeCharacter: "\\")
+		XCTAssertEqual(2, result.records.count)
+		XCTAssertEqual(result.records[0], ["fish and\nchips", "cat\nand\ndog", "bird", "womble"])
+		XCTAssertEqual(result.records[1], ["This is a test", "I \"like\" this! 🥰"])
+	}
 }
 
 final class TinyCSVEncoderTests: XCTestCase {

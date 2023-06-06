@@ -194,7 +194,6 @@ internal extension TinyCSV.EventDrivenDecoder {
 			if character == fieldEscapeCharacter {
 				// The character following the escape character should be treated as a string character
 				if moveToNextCharacter() == false { return .endOfFile }
-				field.append(character)
 			}
 			else if isDelimiter {
 				// If the separator is the last line in the file, make sure

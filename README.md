@@ -1,15 +1,35 @@
 # TinyCSV
 
-A basic Swift CSV decoder/encoder library, conforming to [RFC 4180](https://www.rfc-editor.org/rfc/rfc4180.html) as closely as possible
+A tiny Swift CSV decoder/encoder library, conforming to [RFC 4180](https://www.rfc-editor.org/rfc/rfc4180.html) as closely as possible
 
+![tag](https://img.shields.io/github/v/tag/dagronf/TinyCSV)
 ![Platform support](https://img.shields.io/badge/platform-ios%20%7C%20osx%20%7C%20tvos%20%7C%20watchos%20%7C%20macCatalyst%20%7C%20linux-lightgrey.svg?style=flat-square)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/dagronf/TinyCSV/blob/master/LICENSE) ![Build](https://img.shields.io/github/actions/workflow/status/dagronf/TinyCSV/swift.yml)
 
-Designed to be a minimalist csv decoder and encoder, returning a basic array of rows of cells (strings) during decoding.
+`TinyCSV` is designed to be a minimalist csv decoder and encoder, returning a basic array of rows of cells (strings) during decoding. It attempts to be as lenient as possible when decoding, and very strict when encoding.
 
-TinyCSV doesn't enforce columns, header rows or 'expected' values. If the first row in your file has 10 cells and the second has only 8 cells, then that's what you'll get in the returned data. There are no column formatting rules, it is up to you to handle and massage the data after it is returned.
+`TinyCSV` decoding doesn't enforce columns, header rows or 'expected' values. If the first row in your file has 10 cells and the second has only 8 cells, then that's what you'll get in the returned data. There are no column formatting rules, it is up to you to handle and massage the data after it is returned. `TinyCSV` attempts to break the input data into rows and cells following the (admittedly not well defined) CSV rules and then let you decide what you want to do with the raw once it has been parsed.
 
-All processing is (currently) handled in memory, so large csv files may cause memory stress on smaller devices. If you want to reduce your memory footprint, you might try looking into the [event driven decoding method](#event-driven-decoding-id).  
+A `TinyCSV` decoder expects a Swift `String` as its input type - if you need to read csv data from a file you will have to read the file into a `String` yourself before passing it to be decoded.
+
+All processing is (currently) handled in memory, so large csv files may cause memory stress on smaller devices. If you want to reduce your memory footprint, you might try looking into the [event driven decoding method](#event-driven-decoding-id).
+
+## Decoding support
+
+`TinyCSV` supports :-
+
+* definable delimiters (eg. comma, semicolon, tab)
+* basic delimiter autodetection
+* Unquoted fields (eg. `cat, dog, bird`)
+* Quoted fields (eg. `"cat", "dog", "bird"`)
+* Mixed quoting (eg. `"cat", dog, bird`)
+* Embedded quotes within quoted fields (eg. `"I like ""this""", "...but ""not"" this."`)
+* Embedded quotes within unquoted fields using a field escape character (eg. `I like \"this\", ...but \"not\" this.`)
+* Embedded newlines within quoted fields eg. <br/>
+`"fish and`<br/>`chips, cat`<br/>`and`<br/>`dog"`
+* Embedded newlines within unquoted fields using a field escape character eg. `fish and\`<br/>`chips, cat\`<br/>`and\`<br/>`dog`
+* Optional comment lines
+* Optional ignore header lines
 
 ## Parsing options
 
@@ -60,7 +80,7 @@ B12,, IZOY, AB_K9Z_DD_18, RED,, 12,,,
 let result = parser.decode(text: text, commentCharacter: "#")
 ```
 
-### Escape character
+### Field escape character
 
 Some CSVs use an escaping character to indicate that the next character is to be taken literally, especially when dealing with files that don't quote their fields, for example :-
 
