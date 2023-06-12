@@ -98,7 +98,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 		}
 
 		while true {
-			field = ""
+			field.removeAll(keepingCapacity: true)
 			let state = parseField()
 			if performEmitCurrentField(text: field) == false {
 				// callback has told us to stop
