@@ -31,6 +31,7 @@ public extension TinyCSV.Coder {
 	///   - fieldEscapeCharacter: The field escape character
 	///   - commentCharacter: The comment character
 	///   - headerLineCount: The number of lines at the start of the text to ignore
+	///   - progressCallback: An optional callback indicating the percentage progress (0 -> 100)
 	///   - emitField: Called when the parser emits a field
 	///   - emitRecord: Called when the parser emits a record
 	func startDecoding(
@@ -39,6 +40,7 @@ public extension TinyCSV.Coder {
 		fieldEscapeCharacter: Character? = nil,
 		commentCharacter: Character? = nil,
 		headerLineCount: UInt? = nil,
+		progressCallback: ((Int) -> Void)? = nil,
 		emitField: ((_ row: Int, _ column: Int, _ text: String) -> Bool)?,
 		emitRecord: ((_ row: Int, _ columns: [String]) -> Bool)?
 	) {
@@ -52,6 +54,7 @@ public extension TinyCSV.Coder {
 		)
 		decoder.emitField = emitField
 		decoder.emitRecord = emitRecord
+		decoder.progressCallback = progressCallback
 		return decoder.startParsing()
 	}
 
@@ -62,13 +65,15 @@ public extension TinyCSV.Coder {
 	///   - fieldEscapeCharacter: The field escape character
 	///   - commentCharacter: The comment character
 	///   - headerLineCount: The number of lines at the start of the text to ignore
+	///   - progressCallback: An optional callback indicating the percentage progress (0 -> 100)
 	/// - Returns: CSV data
 	func decode(
 		text: String,
 		delimiter: TinyCSV.Delimiter? = nil,
 		fieldEscapeCharacter: Character? = nil,
 		commentCharacter: Character? = nil,
-		headerLineCount: UInt? = nil
+		headerLineCount: UInt? = nil,
+		progressCallback: ((Int) -> Void)? = nil
 	) -> TinyCSVData {
 		let delimiter = delimiter ?? TinyCSV.detectSeparator(text: text) ?? .comma
 		let decoder = TinyCSV.Decoder(
@@ -78,6 +83,7 @@ public extension TinyCSV.Coder {
 			commentCharacter: commentCharacter,
 			headerLineCount: headerLineCount
 		)
+		decoder.progressCallback = progressCallback
 		return decoder.decode()
 	}
 }

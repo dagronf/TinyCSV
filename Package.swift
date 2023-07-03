@@ -3,24 +3,23 @@
 import PackageDescription
 
 let package = Package(
-    name: "TinyCSV",
-    products: [
-        .library(
-            name: "TinyCSV",
-            targets: ["TinyCSV"]),
-    ],
-    dependencies: [
-    ],
-    targets: [
-        .target(
-            name: "TinyCSV",
-            dependencies: []),
-        .testTarget(
-            name: "TinyCSVTests",
-            dependencies: ["TinyCSV"],
-				resources: [
-					.process("resources"),
-				]
-		  ),
-    ]
+	name: "TinyCSV",
+	products: [
+		.library(
+			name: "TinyCSV",
+			targets: ["TinyCSV"]),
+	],
+	dependencies: [],
+	targets: [
+		.target(
+			name: "TinyCSV",
+			dependencies: []),
+		.testTarget(
+			name: "TinyCSVTests",
+			dependencies: ["TinyCSV"],
+			resources: [
+				.process("resources"),
+			]
+		),
+	]
 )

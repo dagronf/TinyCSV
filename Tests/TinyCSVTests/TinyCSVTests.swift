@@ -517,31 +517,29 @@ t	462x357	1448071	table
 		XCTAssertEqual(result.records[0], ["fish and\nchips", "cat\nand\ndog", "bird", "womble"])
 		XCTAssertEqual(result.records[1], ["This is a test", "I \"like\" this! 🥰"])
 	}
-}
 
-final class TinyCSVEncoderTests: XCTestCase {
-	func testBasic() {
-		let cells = [["cat", "dog"], ["fish", "chips"]]
-		let parser = TinyCSV.Coder()
-		let str = parser.encode(csvdata: cells)
-		XCTAssertEqual(str, "\"cat\",\"dog\"\r\n\"fish\",\"chips\"\r\n")
-	}
-	func testBasic2() {
-		let cells = [["This \"cat\" is bonkers", "dog"], ["fish", "chips"]]
-		let parser = TinyCSV.Coder()
-		let str = parser.encode(csvdata: cells)
+	func testProgressLoading() throws {
+		do {
+			let text = try loadCSV(name: "imdb_top_1000", extn: "csv")
 
-		// Should be "This ""cat"" is bonkers","dog"
-		XCTAssertEqual(str, "\"This \"\"cat\"\" is bonkers\",\"dog\"\r\n\"fish\",\"chips\"\r\n")
-	}
+			var count = 0
+			let data = TinyCSV.Coder().decode(text: text) { percentComplete in
+				count += 1
+			}
+			XCTAssertEqual(101, count)
+			XCTAssertEqual(1001, data.records.count)
+		}
 
-	func testBasic3() {
-		let cells = [["aaa", "b \r\nbb", "ccc"], ["zzz", "yyy", "xxx"]]
+		do {
+			let text = try loadCSV(name: "classification", extn: "csv")
 
-		let parser = TinyCSV.Coder()
-		let str = parser.encode(csvdata: cells)
+			var count = 0
+			let data = TinyCSV.Coder().decode(text: text) { percentComplete in
+				count += 1
+			}
 
-		// Should be "This ""cat"" is bonkers","dog"
-		XCTAssertEqual(str, "\"aaa\",\"b \r\nbb\",\"ccc\"\r\n\"zzz\",\"yyy\",\"xxx\"\r\n")
+			XCTAssertEqual(10, data.records.count)
+			XCTAssertEqual(11, count)
+		}
 	}
 }

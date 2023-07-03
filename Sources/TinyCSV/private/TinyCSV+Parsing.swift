@@ -40,7 +40,22 @@ internal extension TinyCSV.EventDrivenDecoder {
 		field = ""
 		currentRow = 0
 
+		let sz = text.endIndex.utf16Offset(in: text)
+		var last = 0
+
+		// Indicate start
+		progressCallback?(0)
+
 		while !isEndOfFile {
+			if let callback = progressCallback {
+				let current = index.utf16Offset(in: text)
+				let nv = current * 100 / sz
+				if nv != last {
+					callback(nv)
+					last = nv
+				}
+			}
+
 			record = []
 			let state = parseRecord()
 			if record.count > 0 {
@@ -68,6 +83,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 
 		field = ""
 		record = []
+		progressCallback?(100)
 	}
 
 	private func skipLine() -> State {

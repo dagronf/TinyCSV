@@ -33,6 +33,8 @@ extension TinyCSV {
 		var emitField: ((_ row: Int, _ column: Int, _ text: String) -> Bool)?
 		/// Called each time a record is successfully read
 		var emitRecord: ((_ row: Int, _ columns: [String]) -> Bool)?
+		/// Called during the decode process to indicate the current progress (0 -> 100)
+		var progressCallback: ((Int) -> Void)?
 
 		/// The character to identify as an escape character in a unquoted string
 		/// For example, content like
