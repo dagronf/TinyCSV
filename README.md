@@ -4,7 +4,8 @@ A tiny Swift CSV decoder/encoder library, conforming to [RFC 4180](https://www.r
 
 ![tag](https://img.shields.io/github/v/tag/dagronf/TinyCSV)
 ![Platform support](https://img.shields.io/badge/platform-ios%20%7C%20osx%20%7C%20tvos%20%7C%20watchos%20%7C%20macCatalyst%20%7C%20linux-lightgrey.svg?style=flat-square)
-[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/dagronf/TinyCSV/blob/master/LICENSE) ![Build](https://img.shields.io/github/actions/workflow/status/dagronf/TinyCSV/swift.yml)
+[![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/dagronf/TinyCSV/blob/master/LICENSE) 
+![Build](https://img.shields.io/github/actions/workflow/status/dagronf/TinyCSV/swift.yml)
 
 `TinyCSV` is designed to be a minimalist csv decoder and encoder, returning a basic array of rows of cells (strings) during decoding. It attempts to be as lenient as possible when decoding, and very strict when encoding.
 
