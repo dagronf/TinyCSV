@@ -13,7 +13,11 @@ let package = Package(
 	targets: [
 		.target(
 			name: "TinyCSV",
-			dependencies: []),
+			dependencies: [],
+			resources: [
+				.copy("PrivacyInfo.xcprivacy"),
+			]
+		),
 		.testTarget(
 			name: "TinyCSVTests",
 			dependencies: ["TinyCSV"],
