@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                 = "TinyCSV"
-  s.version              = "1.0.0"
+  s.version              = "1.0.1"
   s.summary              = "A tiny Swift CSV decoder/encoder library"
   s.description          = <<-DESC
     A tiny Swift CSV decoder/encoder library, conforming to RFC 4180 as closely as possible
@@ -12,5 +12,7 @@ Pod::Spec.new do |s|
   s.platforms            = { :ios => "12.0", :tvos => "12.0", :osx => "10.13", :watchos => "4.0" }
   s.source_files         = 'Sources/TinyCSV/**/*.swift'
   s.swift_versions       = ['5.4', '5.5', '5.6', '5.7', '5.8', '5.9', '5.10']
-  s.resources            = [ "Sources/TinyCSV/PrivacyInfo.xcprivacy" ]
+  s.resource_bundles     = {
+    'TinyCSV' => 'Sources/TinyCSV/PrivacyInfo.xcprivacy'
+  }
 end
