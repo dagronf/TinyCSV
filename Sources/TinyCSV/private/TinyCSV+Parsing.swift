@@ -34,7 +34,18 @@ internal extension TinyCSV.EventDrivenDecoder {
 	func startParsing() {
 		// file = [header CRLF] record *(CRLF record) [CRLF]
 
-		index = text.startIndex
+		defer {
+			field = ""
+			record = []
+			progressCallback?(100)
+		}
+
+		guard text.count > 0 else {
+			return
+		}
+
+		currentIndex = text.startIndex
+
 		field = ""
 		currentRow = 0
 
@@ -44,9 +55,13 @@ internal extension TinyCSV.EventDrivenDecoder {
 		// Indicate start
 		progressCallback?(0)
 
+		if !isEndOfFile {
+			currentCharacter = text[currentIndex]
+		}
+
 		while !isEndOfFile {
 			if let callback = progressCallback {
-				let current = index.utf16Offset(in: text)
+				let current = currentIndex.utf16Offset(in: text)
 				let nv = current * 100 / sz
 				if nv != last {
 					callback(nv)
@@ -76,12 +91,6 @@ internal extension TinyCSV.EventDrivenDecoder {
 				currentRow += 1
 			}
 		}
-
-		// Clean up
-
-		field = ""
-		record = []
-		progressCallback?(100)
 	}
 
 	private func skipLine() -> State {
@@ -90,7 +99,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 
 		// Read to end of line
 		while true {
-			if character.isNewline {
+			if currentCharacter.isNewline {
 				break
 			}
 			if moveToNextCharacter() == false { return .endOfFile }
@@ -106,7 +115,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 		// * within the header line count, or
 		// * the comment character
 		// just skip the line entirely
-		if headerLineCount > 0 || character == commentCharacter {
+		if headerLineCount > 0 || currentCharacter == commentCharacter {
 			if headerLineCount > 0 { headerLineCount -= 1 }
 			return skipLine()
 		}
@@ -175,7 +184,7 @@ internal extension TinyCSV.EventDrivenDecoder {
 						// If `captureQuotedStringOverrunCharacters` is true, just tack the additional characters
 						// onto the current field
 						if captureQuotedStringOverrunCharacters {
-							field.append(character)
+							field.append(currentCharacter)
 						}
 
 						if moveToNextCharacter() == false { return .endOfFile }
@@ -185,17 +194,17 @@ internal extension TinyCSV.EventDrivenDecoder {
 			else if isFieldEscape {
 				// The character following the escape character should be treated as a regular character
 				if moveToNextCharacter() == false { return .endOfFile }
-				field.append(character)
+				field.append(currentCharacter)
 			}
 			else {
-				field.append(character)
+				field.append(currentCharacter)
 			}
 		}
 	}
 
 	private func parseNonEscapedField() -> State {
 		// non-escaped = *TEXTDATA
-		if character == fieldEscapeCharacter {
+		if currentCharacter == fieldEscapeCharacter {
 			// The character following the escape character should be treated as a string character
 			if moveToNextCharacter() == false { return .endOfFile }
 		}
@@ -207,13 +216,13 @@ internal extension TinyCSV.EventDrivenDecoder {
 		}
 
 		// We need to push the first character
-		field.append(character)
+		field.append(currentCharacter)
 
 		while true {
 			// Just continue until we hit a separator
 			if moveToNextCharacter() == false { return .endOfFile }
 
-			if character == fieldEscapeCharacter {
+			if currentCharacter == fieldEscapeCharacter {
 				// The character following the escape character should be treated as a string character
 				if moveToNextCharacter() == false { return .endOfFile }
 			}
@@ -227,18 +236,17 @@ internal extension TinyCSV.EventDrivenDecoder {
 				if moveToNextCharacter() == false { return .endOfFile }
 				return .endOfLine
 			}
-			field.append(character)
+			field.append(currentCharacter)
 		}
 	}
 }
 
 private extension TinyCSV.EventDrivenDecoder {
-	private var isEndOfFile: Bool { index == text.endIndex }
-	private var isEndOfLine: Bool { text[index].isNewline }
-	private var isDQuote: Bool { text[index] == "\"" }
-	private var isDelimiter: Bool { text[index] == delimiter }
-	private var isFieldEscape: Bool { text[index] == fieldEscapeCharacter}
-	private var character: Character { text[index] }
+	private var isEndOfFile: Bool { currentIndex == text.endIndex }
+	private var isEndOfLine: Bool { currentCharacter.isNewline }
+	private var isDQuote: Bool { currentCharacter == "\"" }
+	private var isDelimiter: Bool { currentCharacter == delimiter }
+	private var isFieldEscape: Bool { currentCharacter == fieldEscapeCharacter}
 
 	private enum State {
 		case endOfField
@@ -248,34 +256,40 @@ private extension TinyCSV.EventDrivenDecoder {
 	}
 
 	private func moveToNextCharacter() -> Bool {
-		index = text.index(after: index)
+		currentIndex = text.index(after: currentIndex)
+		if currentIndex < text.endIndex {
+			currentCharacter = text[currentIndex]
+		}
 		return !isEndOfFile
 	}
 
 	private func moveToPreviousCharacter() -> Bool {
-		index = text.index(before: index)
-		return index >= text.startIndex
+		currentIndex = text.index(before: currentIndex)
+		if currentIndex >= text.startIndex {
+			currentCharacter = text[currentIndex]
+		}
+		return currentIndex >= text.startIndex
 	}
 
 	// Skipping over whitespace, but NOT newlines!
 	private func skipOverWhitespace() -> Bool {
-		if character.isNewline {
+		if currentCharacter.isNewline {
 			return true
 		}
-		if character == "\t" && delimiter == .tab {
+		if currentCharacter == "\t" && delimiter == .tab {
 			return true
 		}
-		if character.isWhitespace == false {
+		if currentCharacter.isWhitespace == false {
 			return true
 		}
 		while moveToNextCharacter() {
-			if character.isNewline {
+			if currentCharacter.isNewline {
 				return true
 			}
-			if character == "\t" && delimiter == .tab {
+			if currentCharacter == "\t" && delimiter == .tab {
 				return true
 			}
-			if character.isWhitespace == false {
+			if currentCharacter.isWhitespace == false {
 				return true
 			}
 		}

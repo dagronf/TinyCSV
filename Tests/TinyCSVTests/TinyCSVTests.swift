@@ -461,6 +461,10 @@ t	462x357	1448071	table
 		for row in result.records {
 			XCTAssertEqual(16, row.count)
 		}
+		
+		XCTAssertEqual(result.records[49][0], "https://m.media-amazon.com/images/M/MV5BZGI5MjBmYzYtMzJhZi00NGI1LTk3MzItYjBjMzcxM2U3MDdiXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_UX67_CR0,0,67,98_AL_.jpg")
+		XCTAssertEqual(result.records[289][15], "16,217,773")
+		XCTAssertEqual(result.records[1000][5], "Crime, Mystery, Thriller")
 	}
 
 	func testIMDBwithOddness() throws {
@@ -540,6 +544,24 @@ t	462x357	1448071	table
 
 			XCTAssertEqual(10, data.records.count)
 			XCTAssertEqual(11, count)
+		}
+	}
+
+	func testPerformance1() throws {
+		let text = try loadCSV(name: "organizations-1000", extn: "csv")
+		let opts = XCTMeasureOptions()
+		opts.iterationCount = 100
+		measure(options: opts) {
+			let _ = TinyCSV.Coder().decode(text: text)
+		}
+	}
+
+	func testPerformance2() throws {
+		let text = try loadCSV(name: "imdb_top_1000", extn: "csv")
+		let opts = XCTMeasureOptions()
+		opts.iterationCount = 10
+		measure(options: opts) {
+			let _ = TinyCSV.Coder().decode(text: text)
 		}
 	}
 }
