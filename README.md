@@ -93,6 +93,28 @@ The parser allows you to optionally specify an escape charcter (in the above exa
 let result = parser.decode(text: text, fieldEscapeCharacter: "\\")
 ```
 
+### Handling quoted fields with overrun characters
+
+The CSV spec does not indicate how to handle characters that lie _outside_ a quote field, for example :-
+
+> `"ABC" noodle, 123, "second"`
+
+By default, the CSV parser will ignore everything outside the quoted string, so in this example ` noodle` is discarded.
+
+```swift
+let text = #""ABC" noodle, 123, "second""#
+let parsed = parser.decode(text: text, delimiter: .comma)
+// parsed.records = [["ABC", "123", "second"]]
+```
+
+Setting `captureQuotedStringOverrunCharacters`, these characters (up to the next separator/eol/eof) are added to the current field.
+
+```swift
+let text = #""ABC" noodle, 123, "second""#
+let parsed = parser.decode(text: text, delimiter: .comma, captureQuotedStringOverrunCharacters: true)
+// parsed.records = [["ABC noodle", "123", "second"]]
+```
+
 ## Examples
 
 ### Decoding

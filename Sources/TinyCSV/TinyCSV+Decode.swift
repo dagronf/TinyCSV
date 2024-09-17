@@ -31,6 +31,7 @@ public extension TinyCSV.Coder {
 	///   - fieldEscapeCharacter: The field escape character
 	///   - commentCharacter: The comment character
 	///   - headerLineCount: The number of lines at the start of the text to ignore
+	///   - captureQuotedStringOverrunCharacters: If true, captures any additional characters _after_ a quoted field but before the separator
 	///   - progressCallback: An optional callback indicating the percentage progress (0 -> 100)
 	///   - emitField: Called when the parser emits a field
 	///   - emitRecord: Called when the parser emits a record
@@ -40,6 +41,7 @@ public extension TinyCSV.Coder {
 		fieldEscapeCharacter: Character? = nil,
 		commentCharacter: Character? = nil,
 		headerLineCount: UInt? = nil,
+		captureQuotedStringOverrunCharacters: Bool = false,
 		progressCallback: ((Int) -> Void)? = nil,
 		emitField: ((_ row: Int, _ column: Int, _ text: String) -> Bool)?,
 		emitRecord: ((_ row: Int, _ columns: [String]) -> Bool)?
@@ -50,7 +52,8 @@ public extension TinyCSV.Coder {
 			delimiter: delimiter,
 			fieldEscapeCharacter: fieldEscapeCharacter,
 			commentCharacter: commentCharacter,
-			headerLineCount: headerLineCount
+			headerLineCount: headerLineCount,
+			captureQuotedStringOverrunCharacters: captureQuotedStringOverrunCharacters
 		)
 		decoder.emitField = emitField
 		decoder.emitRecord = emitRecord
@@ -65,6 +68,7 @@ public extension TinyCSV.Coder {
 	///   - fieldEscapeCharacter: The field escape character
 	///   - commentCharacter: The comment character
 	///   - headerLineCount: The number of lines at the start of the text to ignore
+	///   - captureQuotedStringOverrunCharacters: If true, captures any additional characters _after_ a quoted field but before the separator
 	///   - progressCallback: An optional callback indicating the percentage progress (0 -> 100)
 	/// - Returns: CSV data
 	func decode(
@@ -73,6 +77,7 @@ public extension TinyCSV.Coder {
 		fieldEscapeCharacter: Character? = nil,
 		commentCharacter: Character? = nil,
 		headerLineCount: UInt? = nil,
+		captureQuotedStringOverrunCharacters: Bool = false,
 		progressCallback: ((Int) -> Void)? = nil
 	) -> TinyCSVData {
 		let delimiter = delimiter ?? TinyCSV.detectSeparator(text: text) ?? .comma
@@ -81,7 +86,8 @@ public extension TinyCSV.Coder {
 			delimiter: delimiter,
 			fieldEscapeCharacter: fieldEscapeCharacter,
 			commentCharacter: commentCharacter,
-			headerLineCount: headerLineCount
+			headerLineCount: headerLineCount,
+			captureQuotedStringOverrunCharacters: captureQuotedStringOverrunCharacters
 		)
 		decoder.progressCallback = progressCallback
 		return decoder.decode()

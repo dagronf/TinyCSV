@@ -48,6 +48,9 @@ extension TinyCSV {
 		/// The number of lines to treat as header lines
 		var headerLineCount: UInt = 0
 
+		/// If true, captures any characters outside a quoted cell string (and before the next separator) as field content
+		var captureQuotedStringOverrunCharacters: Bool = false
+
 		// Private
 
 		var index: String.Index
@@ -60,7 +63,8 @@ extension TinyCSV {
 			delimiter: TinyCSV.Delimiter,
 			fieldEscapeCharacter: Character? = nil,
 			commentCharacter: Character? = nil,
-			headerLineCount: UInt? = nil
+			headerLineCount: UInt? = nil,
+			captureQuotedStringOverrunCharacters: Bool = false
 		) {
 			self.text = text
 			self.index = text.startIndex
@@ -68,6 +72,7 @@ extension TinyCSV {
 			self.fieldEscapeCharacter = fieldEscapeCharacter
 			self.commentCharacter = commentCharacter
 			self.headerLineCount = headerLineCount ?? 0
+			self.captureQuotedStringOverrunCharacters = captureQuotedStringOverrunCharacters
 		}
 	}
 }

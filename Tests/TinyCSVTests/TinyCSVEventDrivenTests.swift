@@ -105,5 +105,49 @@ final class TinyCSVEventDrivenTests: XCTestCase {
 			)
 		}
 	}
+
+	func testEvenQuotedOverrun() throws {
+		let text = #""ABC" noodle, 123, "second", "fish" 123"#
+		let coder = TinyCSV.Coder()
+
+		do {
+			// Not capturing quoted field overruns
+			let expectedResults = [["ABC", "123", "second", "fish"]]
+			coder.startDecoding(
+				text: text,
+				delimiter: .comma,
+				emitField: { row, column, text in
+					//Swift.print("\(row), \(column): \(text)")
+					XCTAssertEqual(expectedResults[row][column], text)
+					return true
+				},
+				emitRecord: { row, columns in
+					//Swift.print("\(row): \(columns)")
+					XCTAssertEqual(expectedResults[row], columns)
+					return true
+				}
+			)
+		}
+
+		do {
+			// Capturing quoted field overruns
+			let expectedResults = [["ABC noodle", "123", "second", "fish 123"]]
+			coder.startDecoding(
+				text: text,
+				delimiter: .comma,
+				captureQuotedStringOverrunCharacters: true,
+				emitField: { row, column, text in
+					//Swift.print("\(row), \(column): \(text)")
+					XCTAssertEqual(expectedResults[row][column], text)
+					return true
+				},
+				emitRecord: { row, columns in
+					//Swift.print("\(row): \(columns)")
+					XCTAssertEqual(expectedResults[row], columns)
+					return true
+				}
+			)
+		}
+	}
 }
 

@@ -30,14 +30,16 @@ extension TinyCSV {
 			delimiter: TinyCSV.Delimiter,
 			fieldEscapeCharacter: Character? = nil,
 			commentCharacter: Character? = nil,
-			headerLineCount: UInt? = nil
+			headerLineCount: UInt? = nil,
+			captureQuotedStringOverrunCharacters: Bool = false
 		) {
 			super.init(
 				text: text,
 				delimiter: delimiter,
 				fieldEscapeCharacter: fieldEscapeCharacter,
 				commentCharacter: commentCharacter,
-				headerLineCount: headerLineCount
+				headerLineCount: headerLineCount,
+				captureQuotedStringOverrunCharacters: captureQuotedStringOverrunCharacters
 			)
 			self.emitRecord = { [weak self] row, columns in
 				guard let `self` = self else { return false }
