@@ -171,9 +171,9 @@ internal extension TinyCSV.EventDrivenDecoder {
 							return .endOfField
 						}
 
-						/// Usually if there is text _outside_ the quote string it's discarded
-						/// If `captureQuotedStringOverrunCharacters` is true, just tack the additional characters
-						/// onto the current field
+						// Usually if there is text _outside_ the quote string it's discarded
+						// If `captureQuotedStringOverrunCharacters` is true, just tack the additional characters
+						// onto the current field
 						if captureQuotedStringOverrunCharacters {
 							field.append(character)
 						}
