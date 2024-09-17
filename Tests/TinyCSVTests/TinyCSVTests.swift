@@ -522,6 +522,15 @@ t	462x357	1448071	table
 		XCTAssertEqual(result.records[1], ["This is a test", "I \"like\" this! 🥰"])
 	}
 
+	func testDifferentLanguages() throws {
+		let text = try loadCSV(name: "2747", extn: "csv")
+		let result = TinyCSV.Coder().decode(text: text, delimiter: .tab)
+
+		XCTAssertEqual(26, result.records.count)
+		XCTAssertTrue(result.records[6][4].contains("伏藏"))
+		XCTAssertTrue(result.records[23][4].contains("དབྱར་གནས།"))
+	}
+
 	func testProgressLoading() throws {
 		do {
 			let text = try loadCSV(name: "imdb_top_1000", extn: "csv")
