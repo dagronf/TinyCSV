@@ -51,7 +51,8 @@ extension TinyCSV {
 
 		// Private
 
-		var index: String.Index
+		var currentIndex: String.Index
+		var currentCharacter: Character = "-"
 		var currentRow = 0
 		var record: [String] = []
 		var field = ""
@@ -65,12 +66,14 @@ extension TinyCSV {
 			captureQuotedStringOverrunCharacters: Bool = false
 		) {
 			self.text = text
-			self.index = text.startIndex
+			self.currentIndex = text.startIndex
 			self.delimiter = delimiter
 			self.fieldEscapeCharacter = fieldEscapeCharacter
 			self.commentCharacter = commentCharacter
 			self.headerLineCount = headerLineCount ?? 0
 			self.captureQuotedStringOverrunCharacters = captureQuotedStringOverrunCharacters
+
+			self.record.reserveCapacity(100)
 		}
 	}
 }

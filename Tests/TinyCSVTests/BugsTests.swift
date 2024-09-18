@@ -53,4 +53,13 @@ final class BugsTests: XCTestCase {
 		let parsed2 = TinyCSV.Coder().decode(text: text, delimiter: .comma, captureQuotedStringOverrunCharacters: true)
 		XCTAssertEqual(parsed2.records, [["ABC noodle", "123", "second"]])
 	}
+
+	func testFunkyInputString() throws {
+		let text = #" \"ABC\;\;\;\",123,123,\"\",\"ABC\;\;\;\",\"\",\"\" ; \"ABC\",123,123,\"\",\"ABC\",\"\",\"\" ; \"ABC\",123,123,\"\",\"ABC\",\"\",\"\" "#
+		let parsed = TinyCSV.Coder().decode(text: text, delimiter: .semicolon, fieldEscapeCharacter: "\\")
+		XCTAssertEqual(1, parsed.records.count)
+
+		let parsed2 = TinyCSV.Coder().decode(text: parsed.records[0][0], fieldEscapeCharacter: "\\")
+		XCTAssertEqual(parsed2.records[0], ["ABC;;;", "123", "123", "", "ABC;;;", "", ""])
+	}
 }
