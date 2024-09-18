@@ -22,7 +22,6 @@ import Foundation
 // Routines for decoding csv
 
 internal extension TinyCSV.EventDrivenDecoder {
-
 	@inlinable @inline(__always) func performEmitCurrentField(text: String) -> Bool {
 		self.emitField?(currentRow, record.count, text) ?? true
 	}

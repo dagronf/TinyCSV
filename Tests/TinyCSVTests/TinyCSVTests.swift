@@ -555,22 +555,4 @@ t	462x357	1448071	table
 			XCTAssertEqual(11, count)
 		}
 	}
-
-	func testPerformance1() throws {
-		let text = try loadCSV(name: "organizations-1000", extn: "csv")
-		let opts = XCTMeasureOptions()
-		opts.iterationCount = 100
-		measure(options: opts) {
-			let _ = TinyCSV.Coder().decode(text: text)
-		}
-	}
-
-	func testPerformance2() throws {
-		let text = try loadCSV(name: "imdb_top_1000", extn: "csv")
-		let opts = XCTMeasureOptions()
-		opts.iterationCount = 10
-		measure(options: opts) {
-			let _ = TinyCSV.Coder().decode(text: text)
-		}
-	}
 }
