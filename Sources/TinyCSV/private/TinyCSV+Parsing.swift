@@ -40,24 +40,31 @@ internal extension TinyCSV.EventDrivenDecoder {
 			progressCallback?(100)
 		}
 
-		guard text.count > 0 else {
+		// Indicate start
+		progressCallback?(0)
+
+		// If the text is empty, just drop out
+		if isEndOfFile {
 			return
 		}
 
 		currentIndex = text.startIndex
 
-		field = ""
+		field.reserveCapacity(1024)
+		field.removeAll(keepingCapacity: true)
+
 		currentRow = 0
 
 		let sz = text.endIndex.utf16Offset(in: text)
 		var last = 0
 
-		// Indicate start
-		progressCallback?(0)
-
-		if !isEndOfFile {
-			currentCharacter = text[currentIndex]
+		if isEndOfFile {
+			// Nothing to do!
+			return
 		}
+
+		// Set the current character to the first element of the string
+		currentCharacter = text[text.startIndex]
 
 		while !isEndOfFile {
 			if let callback = progressCallback {
@@ -69,22 +76,22 @@ internal extension TinyCSV.EventDrivenDecoder {
 				}
 			}
 
-			record = []
-			let state = parseRecord()
+			record.removeAll(keepingCapacity: true)
+			let state = self.parseRecord()
 			if record.count > 0 {
 				if record.count == 1 && record[0].isEmpty {
 					// An empty line?
 					continue
 				}
 				if state == .endOfFileWasSeparator {
-					if performEmitCurrentField(text: "") == false {
+					if self.performEmitCurrentField(text: "") == false {
 						// Callback has told us to stop
 						return
 					}
 					record.append("")
 				}
 
-				if performEmitCurrentRecord() == false {
+				if self.performEmitCurrentRecord() == false {
 					// Callback has told us to stop
 					return
 				}
@@ -117,13 +124,13 @@ internal extension TinyCSV.EventDrivenDecoder {
 		// just skip the line entirely
 		if headerLineCount > 0 || currentCharacter == commentCharacter {
 			if headerLineCount > 0 { headerLineCount -= 1 }
-			return skipLine()
+			return self.skipLine()
 		}
 
 		while true {
 			field.removeAll(keepingCapacity: true)
-			let state = parseField()
-			if performEmitCurrentField(text: field) == false {
+			let state = self.parseField()
+			if self.performEmitCurrentField(text: field) == false {
 				// callback has told us to stop
 				return .endOfFile
 			}
@@ -147,10 +154,10 @@ internal extension TinyCSV.EventDrivenDecoder {
 		}
 
 		if isDQuote {
-			return parseEscapedField()
+			return self.parseEscapedField()
 		}
 		else {
-			return parseNonEscapedField()
+			return self.parseNonEscapedField()
 		}
 	}
 
@@ -246,7 +253,7 @@ private extension TinyCSV.EventDrivenDecoder {
 	private var isEndOfLine: Bool { currentCharacter.isNewline }
 	private var isDQuote: Bool { currentCharacter == "\"" }
 	private var isDelimiter: Bool { currentCharacter == delimiter }
-	private var isFieldEscape: Bool { currentCharacter == fieldEscapeCharacter}
+	private var isFieldEscape: Bool { currentCharacter == fieldEscapeCharacter }
 
 	private enum State {
 		case endOfField
@@ -260,7 +267,7 @@ private extension TinyCSV.EventDrivenDecoder {
 		if currentIndex < text.endIndex {
 			currentCharacter = text[currentIndex]
 		}
-		return !isEndOfFile
+		return !self.isEndOfFile
 	}
 
 	private func moveToPreviousCharacter() -> Bool {
@@ -282,7 +289,7 @@ private extension TinyCSV.EventDrivenDecoder {
 		if currentCharacter.isWhitespace == false {
 			return true
 		}
-		while moveToNextCharacter() {
+		while self.moveToNextCharacter() {
 			if currentCharacter.isNewline {
 				return true
 			}

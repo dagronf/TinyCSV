@@ -72,6 +72,8 @@ extension TinyCSV {
 			self.commentCharacter = commentCharacter
 			self.headerLineCount = headerLineCount ?? 0
 			self.captureQuotedStringOverrunCharacters = captureQuotedStringOverrunCharacters
+
+			self.record.reserveCapacity(100)
 		}
 	}
 }
