@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name                 = "TinyCSV"
-  s.version              = "1.1.0"
+  s.version              = "1.2.0"
   s.summary              = "A tiny Swift CSV decoder/encoder library"
   s.description          = <<-DESC
     A tiny Swift CSV decoder/encoder library, conforming to RFC 4180 as closely as possible
